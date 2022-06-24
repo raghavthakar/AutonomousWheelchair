@@ -1,7 +1,7 @@
 # AutonomousWheelchair
 Navigation and localisation for an autonomous wheelchair
 
-###Test Out the Stereo Camera
+### Test Out the Stereo Camera
 The `wheelchair_description` package contains a differential drive robot with a multicamera plugin that simulates a stereo camera in gazebo.
 To launch the robot:
 `roslaunch wheelchair_description gazebo.launch`
