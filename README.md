@@ -11,3 +11,9 @@ To visualise the camera feed, run (in another terminal):
 
 And (in another terminal):
 `ROS_NAMESPACE=stereo rosrun stereo_image_proc stereo_image_proc`
+
+To run the mapping node run:
+`roslaunch hector_mapping mapping_default.launch'
+
+To save the map run:
+`rosrun map_server map_saver`
