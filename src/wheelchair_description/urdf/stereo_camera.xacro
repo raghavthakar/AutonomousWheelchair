@@ -8,7 +8,7 @@
 
 
 <gazebo reference="sensor">
-    <sensor type="multicamera" name="stereo_camera">
+    <sensor name="stereo_camera" type="multicamera" >
       <update_rate>30.0</update_rate>
       <camera name="left">
         <horizontal_fov>1.3962634</horizontal_fov>
@@ -47,12 +47,13 @@
       </camera>
       <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
+        <updateRate>30.0</updateRate>
+        <leftCamera>left</leftCamera>
+        <rightCamera>right</rightCamera>
         <cameraName>stereo</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>left_camera_optical_frame</frameName>
-        <!--<rightFrameName>right_camera_optical_frame</rightFrameName>-->
+        <frameName>camera</frameName>
         <hackBaseline>0.07</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
