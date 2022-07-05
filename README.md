@@ -12,6 +12,9 @@ To visualise the camera feed, run (in another terminal):
 And (in another terminal):
 `ROS_NAMESPACE=stereo rosrun stereo_image_proc stereo_image_proc`
 
+To transform the stereo camera input into the appropriate frame (in another terminal):
+`rosrun tf2_ros static_transform_publisher 0 0 1.05 1.57 0 -1.57  base_link sensor_link`
+
 To run the mapping node run:
 `roslaunch hector_mapping mapping_default.launch'
 
