@@ -17,19 +17,52 @@ struct Point
 class Node
 {
     Point coords;
-    std::list<std::shared_ptr<Node>> children; //maintains a list of all child connections
-    std::shared_ptr<Node> parent; //stores a reference to the parent of the node
+    std::list<Node*> children; //maintains a list of all child connections
+    Node* parent; //stores a reference to the parent of the node
 
 public:
+    Node(){ }
+
+    Node(Point coords)
+    {
+        this->coords = coords;
+    }
+
+    Node(int x, int y)
+    {
+        this->coords.x = x;
+        this->coords.y = y;
+    }
+
     void setCoords(int x, int y)
     {
         coords.x = x;
         coords.y = y;
     }
 
+    Point getCoords()
+    {
+        return coords;
+    }
+
     void display()
     {
-        ROS_INFO("Random config::X:%d Y:%d", coords.x, coords.y);
+        ROS_INFO("X:%d Y:%d", coords.x, coords.y);
+    }
+
+    void addChild(Node* child_node)
+    {
+        this->children.push_back(child_node);
+    }
+
+    void setParent(Node* parent_node)
+    {
+        this->parent = parent_node;
+    }
+
+    std::list<Node*> getChildren()
+    {
+        return this->children;
     }
 };
 
@@ -40,6 +73,13 @@ class RRTHandler
     Point start_point;
     Point target_point;
     unsigned int step_length; //the maximum distance (in pixels) between connected nodes
+    std::list<Node*> all_nodes; //keep track of all nodes to easily find them 
+
+    float distanceBetween(Node* node1, Node* node2)
+    {
+        return(sqrt((node1->getCoords().x-node2->getCoords().x)*(node1->getCoords().x-node2->getCoords().x)
+                     + (node1->getCoords().y-node2->getCoords().y)*(node1->getCoords().y-node2->getCoords().y)));
+    }
 
     // generates a random configuration within the workspace and returns it as a Point
     Node randomConfig()
@@ -51,6 +91,45 @@ class RRTHandler
         Node random_config;
         random_config.setCoords(dist6(rng), dist6(rng));
         return random_config;
+    }
+
+    // return a reference to the node that is closest to the random configuration
+    Node* closestToRandomConfig(Node* q_rand)
+    {
+        float min_dist = -1;
+        Node* q_near;
+        for(Node* tree_node:this->all_nodes)
+        {
+            // tree_node->display();
+            if(min_dist < 0)
+            {
+                min_dist = distanceBetween(q_rand, tree_node);
+                q_near = tree_node;
+            }
+            else if(distanceBetween(q_rand, tree_node) < min_dist)
+            {
+                min_dist = distanceBetween(q_rand, tree_node);
+                q_near = tree_node;
+            }
+            ROS_INFO("Min dist: %f", min_dist);
+        }
+        return q_near;
+    }
+
+    // generates a new configuration in the directio of q_rand from q_near but within step_length
+    Node* newConfiguration(Node* q_rand, Node* q_near)
+    {
+        // get the difference between q_rand and q_near
+        int delta_x = q_rand->getCoords().x - q_near->getCoords().x;
+        int delta_y = q_rand->getCoords().y - q_near->getCoords().y;
+        int nodes_distance = distanceBetween(q_rand, q_near);
+        
+        // scale the x and y coordinates according to distance
+        int new_x = q_near->getCoords().x + (delta_x*this->step_length)/nodes_distance;
+        int new_y = q_near->getCoords().y + (delta_y*this->step_length)/nodes_distance;
+
+        Node* q_new = new Node(new_x, new_y);
+        return q_new;
     }
 
 public:
@@ -66,7 +145,7 @@ public:
         this->target_point.y = map_dim-1;
 
         // set default step length value
-        this->step_length = map_dim/25;
+        this->step_length = map_dim/15;
     }
 
     void setStartPoint(unsigned int x, unsigned int y)
@@ -93,14 +172,41 @@ public:
     void RRT(unsigned int num_iterations)
     {
         unsigned int iteration_count = 0; //keeps track of the number of iterations that have taken place
-        Node q_rand; //random configuration sampled in the workspace
-        Node q_near; //node in the tree that is closest to q_rand
-        Node q_new; //the configuration that is withing step_length of the q_near
+        
+        Node* q_root = new Node(this->start_point); //starting node at the start point
+        this->all_nodes.push_back(q_root); //add the starting node to list of all nodes
+
         while(iteration_count < num_iterations)
         {
-            q_rand = randomConfig();
-            q_rand.display();
+            Node* q_rand = new Node(randomConfig()); //random configuration generated on the map
+            ROS_INFO("Random config: ");
+            q_rand->display();
+
+            Node* q_near = closestToRandomConfig(q_rand); //search through all nodes to find the one closest to random configuration
+            ROS_INFO("Near node: ");
+            q_near->display();
+
+            Node* q_new = newConfiguration(q_rand, q_near); //generate a new configuration along q_rand but within step length
+            ROS_INFO("New Node: ");
+            q_new->display();
+            std::cout<<"\n";
+
+            q_near->addChild(q_new); //make new node the child node of nearest node
+            q_new->setParent(q_near); //make nearest node the parent of new node
+            this->all_nodes.push_back(q_new); //add the new node to list of all nodes
+
             iteration_count++;
+        }
+
+        for(auto tree_node:this->all_nodes)
+        {
+            tree_node->display();
+            ROS_INFO("Children:");
+            for(auto child_node:tree_node->getChildren())
+            {
+                child_node->display();
+            }
+            ROS_INFO("--------------");
         }
     }
 };
