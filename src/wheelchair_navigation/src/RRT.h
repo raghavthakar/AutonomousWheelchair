@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <list>
 #include <random>
+#include <cmath>
 #include <nav_msgs/OccupancyGrid.h>
 
 // struct used to represent all points
@@ -119,16 +120,24 @@ class RRTHandler
     // generates a new configuration in the directio of q_rand from q_near but within step_length
     Node* newConfiguration(Node* q_rand, Node* q_near)
     {
-        // get the difference between q_rand and q_near
-        int delta_x = q_rand->getCoords().x - q_near->getCoords().x;
-        int delta_y = q_rand->getCoords().y - q_near->getCoords().y;
-        int nodes_distance = distanceBetween(q_rand, q_near);
-        
-        // scale the x and y coordinates according to distance
-        int new_x = q_near->getCoords().x + (delta_x*this->step_length)/nodes_distance;
-        int new_y = q_near->getCoords().y + (delta_y*this->step_length)/nodes_distance;
+        Node* q_new;
+        float nodes_distance = distanceBetween(q_rand, q_near);
+        if(nodes_distance < (float) this->step_length)
+        {
+            q_new = new Node(q_rand->getCoords());
+        }
+        else
+        {
+            // Compute the slope between q_rand and q_new
+            float theta = atan2(q_rand->getCoords().y-q_near->getCoords().y, q_rand->getCoords().x-q_near->getCoords().x);
 
-        Node* q_new = new Node(new_x, new_y);
+            // compute the new point q_new
+            int new_x = q_near->getCoords().x + this->step_length * cos(theta);
+            int new_y = q_near->getCoords().y + this->step_length * sin(theta);
+
+            q_new = new Node(new_x, new_y);
+        }
+        
         return q_new;
     }
 
@@ -145,7 +154,7 @@ public:
         this->target_point.y = map_dim-1;
 
         // set default step length value
-        this->step_length = map_dim/15;
+        this->step_length = 10;
     }
 
     void setStartPoint(unsigned int x, unsigned int y)
