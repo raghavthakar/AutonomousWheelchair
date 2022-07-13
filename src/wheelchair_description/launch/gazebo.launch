@@ -16,7 +16,7 @@
     <arg name="headless" value="$(arg headless)"/>
     <arg name="debug" value="$(arg debug)"/>(
     <arg name="verbose" value="$(arg verbose)"/>
-    <arg name="world_name" value="/home/raghav/OntarioTech/AutonomousWheelchair/src/wheelchair_description/worlds/cyberzoo.world"/>
+    <arg name="world_name" value="$(arg world_name)"/>
   </include>
 
   <include file="$(find wheelchair_description)/launch/spawn_wheelchair.launch">

@@ -1,0 +1,5 @@
+<launch>
+    <node name="move_distance_server" pkg="wheelchair_navigation" type="move_distance_server" args="$(arg ns)" output="screen"/>
+    <!-- <node name="move_distance_client" pkg="abc_control" type="move_distance_client" args="$(arg ns)" output="screen"/> -->
+    <node name="agent" pkg="wheelchair_navigation" type="agent" output="screen"/>
+</launch>
