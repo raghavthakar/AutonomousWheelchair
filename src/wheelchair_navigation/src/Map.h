@@ -13,25 +13,13 @@ class MapHandler
     ros::Subscriber map_subscriber;
     nav_msgs::OccupancyGrid map;
 
-    void map_received_cb(nav_msgs::OccupancyGrid::ConstPtr map)
-    {
-        this->map = *map;
-        ROS_INFO("Map received!\n");
-
-        // display the map
-        // for(auto i:this->map.data)
-        //     std::cout<<(int)i<<" ";
-    }
-
 public:
-    MapHandler()
-    {
-        map_subscriber = this->node_handle.subscribe("/map", 1000, &MapHandler::map_received_cb, this);
-    }
+    MapHandler() { }
 
     // return the map 
     nav_msgs::OccupancyGrid getMap()
     {
+        this->map = *ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("/map", this->node_handle); //wait to receive the map
         return this->map;
     }
 };

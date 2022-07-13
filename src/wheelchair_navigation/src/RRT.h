@@ -137,8 +137,30 @@ class RRTHandler
 
             q_new = new Node(new_x, new_y);
         }
-        
+
         return q_new;
+    }
+
+    // checks if a node is occupied or not
+    bool isOccupied(Node* node)
+    {
+        ROS_INFO("Occupation: %d", (int) this->map.data[100]);
+        return false;
+    }
+
+    // Display the whole RRT tree
+    void displayRRT()
+    {
+        for(auto tree_node:this->all_nodes)
+        {
+            tree_node->display();
+            ROS_INFO("Children:");
+            for(auto child_node:tree_node->getChildren())
+            {
+                child_node->display();
+            }
+            ROS_INFO("--------------");
+        }
     }
 
 public:
@@ -198,25 +220,22 @@ public:
             Node* q_new = newConfiguration(q_rand, q_near); //generate a new configuration along q_rand but within step length
             ROS_INFO("New Node: ");
             q_new->display();
-            std::cout<<"\n";
+
+            if(isOccupied(q_new))
+            {
+                iteration_count--;
+                continue;
+            }
 
             q_near->addChild(q_new); //make new node the child node of nearest node
             q_new->setParent(q_near); //make nearest node the parent of new node
             this->all_nodes.push_back(q_new); //add the new node to list of all nodes
 
+            std::cout<<"\n";
             iteration_count++;
         }
 
-        for(auto tree_node:this->all_nodes)
-        {
-            tree_node->display();
-            ROS_INFO("Children:");
-            for(auto child_node:tree_node->getChildren())
-            {
-                child_node->display();
-            }
-            ROS_INFO("--------------");
-        }
+        displayRRT();
     }
 };
 
