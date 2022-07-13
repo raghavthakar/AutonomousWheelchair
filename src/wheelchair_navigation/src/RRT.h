@@ -2,10 +2,12 @@
 #define RRT_H
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <list>
 #include <random>
 #include <cmath>
+#include <ctime>
 #include <nav_msgs/OccupancyGrid.h>
 
 // struct used to represent all points
@@ -39,6 +41,11 @@ public:
     {
         coords.x = x;
         coords.y = y;
+    }
+
+    void setCoords(Point coords)
+    {
+        this->coords = coords;
     }
 
     Point getCoords()
@@ -85,6 +92,7 @@ class RRTHandler
     // generates a random configuration within the workspace and returns it as a Point
     Node randomConfig()
     {
+        sleep(0.1);
         std::random_device dev;
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist6(0,map_dim-1); // distribution in range
@@ -112,19 +120,19 @@ class RRTHandler
                 min_dist = distanceBetween(q_rand, tree_node);
                 q_near = tree_node;
             }
-            ROS_INFO("Min dist: %f", min_dist);
+            // ROS_INFO("Min dist: %f", min_dist);
         }
         return q_near;
     }
 
     // generates a new configuration in the directio of q_rand from q_near but within step_length
-    Node* newConfiguration(Node* q_rand, Node* q_near)
+    Node newConfiguration(Node* q_rand, Node* q_near)
     {
-        Node* q_new;
+        Node q_new;
         float nodes_distance = distanceBetween(q_rand, q_near);
         if(nodes_distance < (float) this->step_length)
         {
-            q_new = new Node(q_rand->getCoords());
+            q_new.setCoords(q_rand->getCoords());
         }
         else
         {
@@ -134,8 +142,10 @@ class RRTHandler
             // compute the new point q_new
             int new_x = q_near->getCoords().x + this->step_length * cos(theta);
             int new_y = q_near->getCoords().y + this->step_length * sin(theta);
+            ROS_INFO("Q_NEAR coords: %d %d", q_near->getCoords().x, q_near->getCoords().y);
+            ROS_INFO("New coords: %d %d", new_x, new_y);
 
-            q_new = new Node(new_x, new_y);
+            q_new.setCoords(new_x, new_y);
         }
 
         return q_new;
@@ -186,6 +196,23 @@ class RRTHandler
         }
     }
 
+    // save the Tree as a CSV file
+    void saveTree()
+    {
+        std::ofstream csv_file("/home/raghav/OntarioTech/AutonomousWheelchair/src/wheelchair_navigation/src/sample_maps/tree_nodes.csv", std::ios::out | std::ios::binary);
+        for(auto node:this->all_nodes)
+        {
+            csv_file << "----------\n";
+            csv_file << node->getCoords().x << "," <<node->getCoords().y << "\n";
+            for(auto child_node:node->getChildren())
+            {
+                csv_file << child_node->getCoords().x << "," <<child_node->getCoords().y << "\n";
+            }
+            csv_file << "----------\n";
+        }
+        csv_file.close();
+    }
+
 public:
     RRTHandler(nav_msgs::OccupancyGrid map, unsigned int map_dim)
     {
@@ -232,6 +259,7 @@ public:
 
         while(iteration_count < num_iterations)
         {
+            std::cout<<"\n";
             Node* q_rand = new Node(randomConfig()); //random configuration generated on the map
             ROS_INFO("Random config: ");
             q_rand->display();
@@ -240,7 +268,7 @@ public:
             ROS_INFO("Near node: ");
             q_near->display();
 
-            Node* q_new = newConfiguration(q_rand, q_near); //generate a new configuration along q_rand but within step length
+            Node* q_new = new Node(newConfiguration(q_rand, q_near)); //generate a new configuration along q_rand but within step length
             ROS_INFO("New Node: ");
             q_new->display();
 
@@ -256,6 +284,7 @@ public:
             iteration_count++;
         }
 
+        saveTree();
         displayRRT();
     }
 };
