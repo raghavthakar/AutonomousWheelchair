@@ -144,7 +144,30 @@ class RRTHandler
     // checks if a node is occupied or not
     bool isOccupied(Node* node)
     {
-        ROS_INFO("Occupation: %d", (int) this->map.data[100]);
+        ROS_INFO("Occupation: %d", (int) this->map.data[node->getCoords().y*this->map_dim+node->getCoords().x]);
+        
+        if ((int) this->map.data[node->getCoords().y*this->map_dim+node->getCoords().x] == 0)
+            return false;
+        else
+            return true;
+    }
+
+    // checks if there is an obstacle between q_near and q_new
+    bool obstacleBetween(Node* q_near, Node* q_new)
+    {
+        int limit_x = q_new->getCoords().x - q_near->getCoords().x;
+        int limit_y = q_new->getCoords().y - q_near->getCoords().y;
+
+        // iterate the whole triangle from q_near to q_new and return true if any element is an obstacle
+        for(int iter_x=q_near->getCoords().x; iter_x!=q_new->getCoords().x; iter_x+=limit_x/abs(limit_x))
+        {
+            for(int iter_y=q_near->getCoords().y; iter_y!=q_new->getCoords().y; iter_y+=limit_y/abs(limit_y))
+            {
+                if(this->map.data[iter_y*this->map_dim+iter_x] == 100)
+                    return true;
+            }
+        }
+
         return false;
     }
 
@@ -221,9 +244,8 @@ public:
             ROS_INFO("New Node: ");
             q_new->display();
 
-            if(isOccupied(q_new))
+            if(isOccupied(q_new) || obstacleBetween(q_near, q_new))
             {
-                iteration_count--;
                 continue;
             }
 
@@ -231,7 +253,6 @@ public:
             q_new->setParent(q_near); //make nearest node the parent of new node
             this->all_nodes.push_back(q_new); //add the new node to list of all nodes
 
-            std::cout<<"\n";
             iteration_count++;
         }
 
