@@ -6,6 +6,8 @@ It is also included within ~/python_scripts
 
 In order to run the scripts, you need all the dependencies for the Intel RealSense depth cameras
 
+## Prerequisites
+
 ```
 sudo apt install pip
 pip install realsense2
