@@ -1,4 +1,4 @@
-# VisualSlopeDetection
+# Visual Slope Detection
 
 This repository uses the backend OpenCV processing file from PySource which can be downloaded from: https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 
