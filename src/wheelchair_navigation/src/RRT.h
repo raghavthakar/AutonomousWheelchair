@@ -137,11 +137,14 @@ class RRTHandler
         else
         {
             // Compute the slope between q_rand and q_new
-            float theta = atan2(q_rand->getCoords().y-q_near->getCoords().y, q_rand->getCoords().x-q_near->getCoords().x);
+            double delta_x = (double) q_rand->getCoords().x-(double) q_near->getCoords().x;
+            double delta_y = (double) q_rand->getCoords().y-(double) q_near->getCoords().y;
+            double theta = atan2(delta_y, delta_x);
 
             // compute the new point q_new
             int new_x = q_near->getCoords().x + this->step_length * cos(theta);
             int new_y = q_near->getCoords().y + this->step_length * sin(theta);
+            ROS_INFO("THETA: %f", theta);
             ROS_INFO("Q_NEAR coords: %d %d", q_near->getCoords().x, q_near->getCoords().y);
             ROS_INFO("New coords: %d %d", new_x, new_y);
 
