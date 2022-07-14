@@ -1,22 +1,75 @@
-# AutonomousWheelchair
-Navigation and localisation for an autonomous wheelchair
+# VisualSlopeDetection
 
-### Test Out the Stereo Camera
-The `wheelchair_description` package contains a differential drive robot with a multicamera plugin that simulates a stereo camera in gazebo.
-To launch the robot:
-`roslaunch wheelchair_description gazebo.launch`
+This repository uses the backend OpenCV processing file from PySource which can be downloaded from: https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 
-To visualise the camera feed, run (in another terminal):
-`rosrun image_view stereo_view stereo:=/stereo image:=image_raw _approximate_sync:=True`
+It is also included within ~/python_scripts
 
-And (in another terminal):
-`ROS_NAMESPACE=stereo rosrun stereo_image_proc stereo_image_proc`
+In order to run the scripts, you need all the dependencies for the Intel RealSense depth cameras
 
-To transform the stereo camera input into the appropriate frame (in another terminal):
-`rosrun tf2_ros static_transform_publisher 0 0 1.05 1.57 0 -1.57  base_link sensor_link`
+```
+sudo apt install pip
+pip install realsense2
+pip install opencv-python
+```
 
-To run the mapping node run:
-`roslaunch hector_mapping mapping_default.launch'
+The filtering implementation and array requires Scipy and Numpy, they should be installed in your local machine 
 
-To save the map run:
-`rosrun map_server map_saver`
+```
+pip install numpy
+pip install scipy
+
+```
+
+Update and upgrade packages
+
+```
+
+sudo apt update
+sudo apt upgrade
+```
+
+## Running the script
+
+The main file that runs the logic for slope detection is depthcam_distance.py
+
+Make the python file an executable:
+
+```
+chmod +x depthcam_slope.py
+chmod +x realsense_depth.py
+```
+Run depthcam_slope.py
+
+```
+./depthcam_distance.py
+```
+
+## Expected output
+colour frame is just for reference an can be disabled, all depth measurements are from the depth frame.
+Angled camera ( ~ 20 degree inclination)
+
+![Screenshot from 2022-07-14 14-58-13](https://user-images.githubusercontent.com/58850654/179061995-10b485b3-ebe7-4ae1-951f-8362853066aa.png)
+
+
+
+## Approach for slope detection
+
+### Geometric Approach
+
+This approach dedicated an area and an array of pixel values all a fixed distance apart. Any object detected within this range of pixels will return 4 distances from these pixels
+
+![depthcam1 (1)](https://user-images.githubusercontent.com/58850654/179021620-496e70e2-c66d-405c-b454-0a21960259be.png)
+
+θ is considered to be the angle that is calculated from slopes from distances 
+Φ is the actual slope of the obstacle
+
+to calculate angle θ, 3 slopes are calculated which are distance from all the point with reference to one point. The arc tangent of the slopes will give that value of θ.
+
+This can be achieved with just 2 pixel points as well, however using multiple points and averaging slopes results in a more accurate output. It also accounts for the fact if a particular pixel point has a dead-zone due to scratch, relying on those pixels won't yeild in accurate measurements.
+
+
+### Filtering
+
+To make the data more accurate and less susceptible towards any noise, a simple 3 point moving average filter is used. A basic mean or low pass filter can be explored as well.
+
+
