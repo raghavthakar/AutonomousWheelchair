@@ -41,7 +41,7 @@ chmod +x realsense_depth.py
 Run depthcam_slope.py
 
 ```
-./depthcam_distance.py
+./depthcam_slope.py
 ```
 
 ## Expected output
