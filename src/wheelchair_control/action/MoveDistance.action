@@ -1,0 +1,8 @@
+#goal
+geometry_msgs/Point target
+---
+#result
+geometry_msgs/Pose current_pose
+---
+#feedback
+float64 distance_left

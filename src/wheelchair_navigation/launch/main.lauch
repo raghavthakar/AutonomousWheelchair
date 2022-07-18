@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="map_server" type="map_server" name="map_server" args="/home/raghav/OntarioTech/AutonomousWheelchair/src/wheelchair_navigation/src/sample_maps/pixil.launch"/>
-    <node pkg="wheelchair_navigation" type="map_retriever" name="map_retriever"/>
-</launch>
