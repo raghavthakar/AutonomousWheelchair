@@ -16,7 +16,7 @@
 
 // linear velocity of the robot
 #define BASE_LINEAR_VEL 0.25
-#define SCAN_LINE 180
+#define SCAN_LINE 360
 #define PI 3.14159265
 // minimum obsacle distance bias
 #define OBS_DIST_BASE 0.85
@@ -205,7 +205,7 @@ class Mover
 
 public:
     // consructor with intitializer list
-    Mover(char** argv):server(node_handle, "move_distance", boost::bind(&Mover::move, this, _1), false)
+    Mover():server(node_handle, "move_distance", boost::bind(&Mover::move, this, _1), false)
     {
         ROS_INFO_STREAM("in the constructor");
         // setting up the variables that will be used throughout
@@ -231,7 +231,8 @@ public:
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "move_distance_server");
-    Mover mover(argv);
+    ROS_INFO_STREAM("in the main");
+    Mover mover();
     ros::spin();
     return 0;
 }

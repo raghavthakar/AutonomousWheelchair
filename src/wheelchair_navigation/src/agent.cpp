@@ -14,6 +14,7 @@
 int main(int argc, char**argv)
 {
     ros::init(argc, argv, "agent");
+    ROS_INFO_STREAM("in the main");
     // iniitalise the action client
     actionlib::SimpleActionClient<wheelchair_navigation::MoveDistanceAction> client("move_distance", true);
 
