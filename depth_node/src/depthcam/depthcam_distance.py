@@ -36,8 +36,6 @@ def main():
     rospy.Subscriber(topic,Image,imagecallback)
     rospy.spin()
 
-if __name__=='__main__':
-    main()
     while True:
         ret,depth_frame,clr_frame=depthcam.get_frame()
 
@@ -76,8 +74,7 @@ if __name__=='__main__':
         print(90.0-slope_mean)
 
         cv2.imshow("Depth Frame", depth_frame)
-        # cv2.imshow("Coloured Frame", clr_frame)
+       
 
-        # if key==27:
-        #     break  #Press F to break
-
+if __name__=='__main__':
+    main()

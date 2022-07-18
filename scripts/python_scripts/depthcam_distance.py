@@ -5,6 +5,8 @@ import pyrealsense2
 from realsense_depth import *
 import math
 import numpy as np
+from scipy import signal
+
 
 #Defining depth cam
 
