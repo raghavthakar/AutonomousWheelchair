@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     MapHandler map_handler;
     RRTHandler rrt_handler(map_handler.getMap(), 128);
     rrt_handler.setTargetPoint(127, 127);
-    rrt_handler.RRT(10);
+    rrt_handler.RRT(100);
     ros::spin();
     return 0;
 }

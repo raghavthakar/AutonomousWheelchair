@@ -205,13 +205,12 @@ class RRTHandler
         std::ofstream csv_file("/home/raghav/OntarioTech/AutonomousWheelchair/src/wheelchair_navigation/src/sample_maps/tree_nodes.csv", std::ios::out | std::ios::binary);
         for(auto node:this->all_nodes)
         {
-            csv_file << "----------\n";
-            csv_file << node->getCoords().x << "," <<node->getCoords().y << "\n";
+            csv_file << node->getCoords().x << "," <<node->getCoords().y ;
             for(auto child_node:node->getChildren())
             {
-                csv_file << child_node->getCoords().x << "," <<child_node->getCoords().y << "\n";
+                csv_file << ":" << child_node->getCoords().x << "," <<child_node->getCoords().y;
             }
-            csv_file << "----------\n";
+            csv_file << "\n";
         }
         csv_file.close();
     }
