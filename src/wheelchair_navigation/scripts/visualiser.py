@@ -23,7 +23,7 @@ pygame.display.set_caption('Image')
 # create a surface object, image is drawn on it.
 image = pygame.image.load(r'/home/raghav/OntarioTech/AutonomousWheelchair/src/wheelchair_navigation/src/sample_maps/map.pgm')
 # scale the image to mathc the resolution of the window
-image = pygame.transform.scale(image, (X, Y))
+# image = pygame.transform.scale(image, (X, Y))
 display_surface.blit(image, (0, 0)) #load the image on as background
 
 # coordinates of root and child are string with , in between

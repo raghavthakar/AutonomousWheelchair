@@ -22,13 +22,17 @@ class Node
     Point coords;
     std::list<Node*> children; //maintains a list of all child connections
     Node* parent; //stores a reference to the parent of the node
+    double cost; //cost to travel from root to this node
 
 public:
-    Node(){ }
+    Node(){ 
+        this->cost = 0;
+    }
 
     Node(Point coords)
     {
         this->coords = coords;
+        this->cost = 0;
     }
 
     Node(int x, int y)
@@ -48,14 +52,24 @@ public:
         this->coords = coords;
     }
 
+    void setCost(double cost)
+    {
+        this->cost = cost;
+    }
+
     Point getCoords()
     {
         return coords;
     }
 
+    double getCost()
+    {
+        return this->cost;
+    }
+
     void display()
     {
-        ROS_INFO("X:%d Y:%d", coords.x, coords.y);
+        ROS_INFO("X:%d Y:%d Cost:%g", coords.x, coords.y, cost);
     }
 
     void addChild(Node* child_node)
@@ -63,9 +77,11 @@ public:
         this->children.push_back(child_node);
     }
 
-    void setParent(Node* parent_node)
+    // set the pointer to parent and update cost of node
+    void setParentUpdateCost(Node* parent_node, double distance)
     {
         this->parent = parent_node;
+        this->cost = this->parent->getCost() + distance;
     }
 
     std::list<Node*> getChildren()
@@ -81,6 +97,7 @@ class RRTHandler
     Point start_point;
     Point target_point;
     unsigned int step_length; //the maximum distance (in pixels) between connected nodes
+    unsigned int search_radius; //the readius within which qnew searches for improved connections
     std::list<Node*> all_nodes; //keep track of all nodes to easily find them 
 
     float distanceBetween(Node* node1, Node* node2)
@@ -152,6 +169,36 @@ class RRTHandler
         }
 
         return q_new;
+    }
+
+    //Returns a vector of all neighbours of q_new within the search_radius
+    std::vector<Node*> searchNeighbours(Node* q_new, Node* q_near)
+    {
+        std::vector<Node*> q_neighbours;
+        for(Node* node:this->all_nodes)
+        {
+            if(distanceBetween(node, q_new) <= this->search_radius && node != q_near)
+                q_neighbours.push_back(node);
+        }
+
+        return q_neighbours;
+    }
+
+    // return the neigbour connecting with whom gives best connection cost-wise
+    Node* pickBestNeighbour(std::vector<Node*> q_neighbours, Node* q_near, Node* q_new)
+    {
+        if(q_neighbours.empty()) // if there are no neighbours then simply return q_near
+            return q_near;
+        
+        Node* q_best = q_near; //by default connect with q_near
+        for (Node* neighbour:q_neighbours)
+        {
+            // if connecting to a neighbour is better than q_best, then make q_best the neighbour
+            if(neighbour->getCost() + distanceBetween(neighbour, q_new) < q_best->getCost() + distanceBetween(q_best, q_new))
+                q_best = neighbour;
+        }
+
+        return q_best;
     }
 
     // checks if a node is occupied or not
@@ -229,6 +276,9 @@ public:
 
         // set default step length value
         this->step_length = 10;
+
+        // set the default search radius value
+        this->search_radius = 20;
     }
 
     void setStartPoint(unsigned int x, unsigned int y)
@@ -252,6 +302,11 @@ public:
         this->step_length = step_length;
     }
 
+    void setSearchRadius(unsigned int search_radius)
+    {
+        this->search_radius = search_radius;
+    }
+
     void RRT(unsigned int num_iterations)
     {
         unsigned int iteration_count = 0; //keeps track of the number of iterations that have taken place
@@ -271,17 +326,27 @@ public:
             q_near->display();
 
             Node* q_new = new Node(newConfiguration(q_rand, q_near)); //generate a new configuration along q_rand but within step length
-            ROS_INFO("New Node: ");
-            q_new->display();
 
-            if(isOccupied(q_new) || obstacleBetween(q_near, q_new))
+            std::vector<Node*> q_neighbours = searchNeighbours(q_new, q_near); //search and return the neigbours of q_new withing the search radius (except q_near)
+            ROS_INFO("Neighbours: ");
+            for(auto i:q_neighbours)
+                i->display();
+
+            Node* q_best = pickBestNeighbour(q_neighbours, q_near, q_new); //find the neighbour connecting with whom will result in lowest cost
+            ROS_INFO("Best neighbour: ");
+            q_best->display();
+
+            if(isOccupied(q_new) || obstacleBetween(q_best, q_new))
             {
                 continue;
             }
 
             q_near->addChild(q_new); //make new node the child node of nearest node
-            q_new->setParent(q_near); //make nearest node the parent of new node
+            q_new->setParentUpdateCost(q_best, distanceBetween(q_new, q_best)); //make nearest node the parent of new node and and add distance to the cost of q_new
             this->all_nodes.push_back(q_new); //add the new node to list of all nodes
+            
+            ROS_INFO("New Node: ");
+            q_new->display();
 
             iteration_count++;
         }
