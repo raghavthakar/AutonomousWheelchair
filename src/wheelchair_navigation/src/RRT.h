@@ -253,6 +253,15 @@ class RRTHandler
         return false;
     }
 
+    // rewire neighbour to have q_new as parent
+    void rewire(Node* neighbour, Node* q_new)
+    {
+        neighbour->getParent()->removeChild(neighbour); //remove neighbour as a child from its parent
+        neighbour->setParent(q_new); //make q_new the parent
+        neighbour->setCost(q_new->getCost() + distanceBetween(neighbour, q_new)); //set the new cost to reach neighbour
+        q_new->addChild(neighbour); //add the neighbour to q_new's list of children
+    }
+
     // Display the whole RRT tree
     void displayRRT()
     {
@@ -372,16 +381,8 @@ public:
 
             q_neighbours.push_back(q_near); //add q_near to set of all neighbours of q_new
             for(Node* neighbour:q_neighbours) //iterate through all neighbours to check for possible rewiring
-            {
-                if(neighbour->getCost() > q_new->getCost() + distanceBetween(neighbour, q_new)) //if reaching the neighbour via q_new is cheaper
-                {
-                    neighbour->getParent()->removeChild(neighbour); //remove neighbour as a child from its parent
-                    neighbour->setParent(q_new); //make q_new the parent
-                    neighbour->setCost(q_new->getCost() + distanceBetween(neighbour, q_new)); //set the new cost to reach neighbour
-                    q_new->addChild(neighbour); //add the neighbour to q_new's list of children
-
-                }
-            }
+                if(neighbour->getCost() > q_new->getCost() + distanceBetween(neighbour, q_new) && !obstacleBetween(neighbour, q_new)) //if reaching the neighbour via q_new is cheaper and there is no obstacle in-between
+                    rewire(neighbour, q_new); //rewire neighbour to have q_new as parent
 
             iteration_count++;
         }
