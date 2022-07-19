@@ -57,6 +57,11 @@ public:
         this->cost = cost;
     }
 
+    Node* getParent()
+    {
+        return this->parent;
+    }
+
     Point getCoords()
     {
         return coords;
@@ -77,8 +82,13 @@ public:
         this->children.push_back(child_node);
     }
 
+    void setParent(Node* parent_node)
+    {
+        this->parent = parent_node;
+    }
+
     // set the pointer to parent and update cost of node
-    void setParentUpdateCost(Node* parent_node, double distance)
+    void setParentAugmentCost(Node* parent_node, double distance)
     {
         this->parent = parent_node;
         this->cost = this->parent->getCost() + distance;
@@ -87,6 +97,18 @@ public:
     std::list<Node*> getChildren()
     {
         return this->children;
+    }
+
+    void removeChild(Node* child_node)
+    {
+        try
+        {
+            this->children.remove(child_node);
+        }
+        catch(int err)
+        {
+            ;
+        }
     }
 };
 
@@ -342,11 +364,24 @@ public:
             }
 
             q_near->addChild(q_new); //make new node the child node of nearest node
-            q_new->setParentUpdateCost(q_best, distanceBetween(q_new, q_best)); //make nearest node the parent of new node and and add distance to the cost of q_new
+            q_new->setParentAugmentCost(q_best, distanceBetween(q_new, q_best)); //make nearest node the parent of new node and and add distance to the cost of q_new
             this->all_nodes.push_back(q_new); //add the new node to list of all nodes
             
             ROS_INFO("New Node: ");
             q_new->display();
+
+            q_neighbours.push_back(q_near); //add q_near to set of all neighbours of q_new
+            for(Node* neighbour:q_neighbours) //iterate through all neighbours to check for possible rewiring
+            {
+                if(neighbour->getCost() > q_new->getCost() + distanceBetween(neighbour, q_new)) //if reaching the neighbour via q_new is cheaper
+                {
+                    neighbour->getParent()->removeChild(neighbour); //remove neighbour as a child from its parent
+                    neighbour->setParent(q_new); //make q_new the parent
+                    neighbour->setCost(q_new->getCost() + distanceBetween(neighbour, q_new)); //set the new cost to reach neighbour
+                    q_new->addChild(neighbour); //add the neighbour to q_new's list of children
+
+                }
+            }
 
             iteration_count++;
         }
