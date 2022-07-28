@@ -20,3 +20,12 @@ To run the mapping node run:
 
 To save the map run:
 `rosrun map_server map_saver`
+
+## Future steps and prospectus
+
+### Motor Driver Vs Motor Controller
+
+#### Motor Controller
+
+#### Motor driver
+
