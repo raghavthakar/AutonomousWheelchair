@@ -53,3 +53,11 @@ Setup and implement a ROS Serial package --> make sure that twist messages can b
 
 Hardware POV and parallel things to look into:
 Decide on the motor driver/ controller --> find a way to separately interface the encoders of the motors using microROS -- take out the old XDC 2430 controller on the wheelchair and replace the original propreitary controller of the Quickie Xperience 2. -- Make MT connectors for charging the lead acid batteries on the wheelchair.
+
+
+Feel free to connect with any of the three in case of any doubts, we'd be happy to help in any way possible:
+
+Raghav Thakar 
+Akshat Pandey
+Pierre Lamart
+
