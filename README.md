@@ -43,15 +43,15 @@ Some choices for motor controllers if opted:
 Roboteq MDC 2460: https://www.robotshop.com/ca/en/solo-mini-40v-80a-dc-bldc-pmsm-acim-motor-controller.html
 MCP 263: https://www.robotshop.com/ca/en/mcp263-dual-60a-34vdc-advanced-motor-controller.html
 
-A summary of future steps
+#### A summary of future steps
 
-Sensor POV:
+##### Sensor POV:
 Setup CUDA 11 and set up zed camera with ROS. --> port the slope prediction done with intel depth cameras to a ROS node which uses the zed camera. --> Discuss and try the possibilities to use a laser scanner or a sensor which might help more in detecting obstacles not present in the map ( local planner avoidance)
 
-ROS POV:
+##### ROS POV:
 Setup and implement a ROS Serial package --> make sure that twist messages can be sent to the wheelchair via this package --> make a basic hardware interface based on differential drive kinematics of the wheelchair to ensure accurate translation of messages into hardware --> Explore the different local planner possibilities for local obstacle avoidance --> Attempt to transform depthimage to laserscan within gazebo simulations and try navigation with the transformed topic.
 
-Hardware POV and parallel things to look into:
+##### Hardware POV and parallel things to look into:
 Decide on the motor driver/ controller --> find a way to separately interface the encoders of the motors using microROS -- take out the old XDC 2430 controller on the wheelchair and replace the original propreitary controller of the Quickie Xperience 2. -- Make MT connectors for charging the lead acid batteries on the wheelchair.
 
 
