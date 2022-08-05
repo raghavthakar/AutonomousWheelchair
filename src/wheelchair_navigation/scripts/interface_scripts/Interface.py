@@ -32,7 +32,7 @@ image_viewer_column = [
     [sg.Text(size=(40, 2), key="-TARGET-")],
     [sg.HSeparator()],
     [sg.Text("Press 'Validate' to save coordinates in the csv file")],
-    [sg.Button("Validate", button_color=('white', 'green')), sg.Push(), sg.Button("Close", button_color=('white', 'firebrick3'))],
+    [sg.Button("Validate", button_color=('white', 'green')), sg.Text(" ", key="-VALIDATED-"), sg.Push(), sg.Button("Close", button_color=('white', 'firebrick3'))],
 ]
 
 # ----- Full layout -----
@@ -105,6 +105,7 @@ while True:
                 writer = csv.DictWriter(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL, fieldnames=['Starting coordinates', 'Targeted coordinates'])
                 writer.writeheader() # Write the header for both columns
                 writer.writerow({'Starting coordinates': CoordinatesS, 'Targeted coordinates': CoordinatesT}) # Write the data for both columns
+                window["-VALIDATED-"].update("CSV file updated")
 
         except:
             pass
